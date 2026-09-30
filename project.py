@@ -4,9 +4,7 @@ import requests
 app = Flask(__name__)
 def get_weather(city):
     try:
-        # Find the city's coordinates
         geo_url = "https://geocoding-api.open-meteo.com/v1/search"
-
         geo_params = {
             "name": city,
             "count": 1,
@@ -14,18 +12,16 @@ def get_weather(city):
             "format": "json"
         }
 
-        geo_response = requests.get(geo_url, params=geo_params)
+        geo_response = requests.get(geo_url, params=geo_params, timeout=10)
         geo_data = geo_response.json()
 
-        if "results" not in geo_data:
-            return "Weather information not available"
+        if "results" not in geo_data or not geo_data["results"]:
+            return "🌤️ Weather information not available"
 
         latitude = geo_data["results"][0]["latitude"]
         longitude = geo_data["results"][0]["longitude"]
 
-        # Get current weather
         weather_url = "https://api.open-meteo.com/v1/forecast"
-
         weather_params = {
             "latitude": latitude,
             "longitude": longitude,
@@ -33,35 +29,55 @@ def get_weather(city):
             "timezone": "auto"
         }
 
-        weather_response = requests.get(weather_url, params=weather_params)
+        weather_response = requests.get(
+            weather_url,
+            params=weather_params,
+            timeout=10
+        )
         weather_data = weather_response.json()
 
-        temperature = weather_data["current"]["temperature_2m"]
-        weather_code = weather_data["current"]["weather_code"]
+        current = weather_data.get("current")
 
-        weather_conditions = {
+        if not current:
+            return "🌤️ Weather information not available"
+
+        temperature = current.get("temperature_2m")
+        weather_code = current.get("weather_code")
+
+        weather_labels = {
             0: "☀️ Clear sky",
             1: "🌤️ Mainly clear",
             2: "⛅ Partly cloudy",
             3: "☁️ Overcast",
             45: "🌫️ Foggy",
+            48: "🌫️ Foggy",
             51: "🌦️ Light drizzle",
+            53: "🌦️ Drizzle",
+            55: "🌧️ Heavy drizzle",
             61: "🌧️ Light rain",
-            63: "🌧️ Moderate rain",
-            71: "❄️ Snow",
+            63: "🌧️ Rain",
+            65: "🌧️ Heavy rain",
+            71: "🌨️ Light snow",
+            73: "🌨️ Snow",
+            75: "❄️ Heavy snow",
             80: "🌦️ Rain showers",
-            95: "⛈️ Thunderstorm"
+            81: "🌧️ Rain showers",
+            82: "🌧️ Heavy rain showers",
+            95: "⛈️ Thunderstorm",
+            96: "⛈️ Thunderstorm with hail",
+            99: "⛈️ Thunderstorm with heavy hail"
         }
 
-        condition = weather_conditions.get(
+        condition = weather_labels.get(
             weather_code,
             "🌤️ Weather information available"
         )
 
-        return f"{temperature}°C — {condition}"
+        return f"{condition}<br>🌡️ Temperature: {temperature}°C"
 
-    except Exception:
-        return "Weather information not available"
+    except Exception as e:
+        print("Weather error:", e)
+        return "🌤️ Weather information not available"
 def get_forecast(city):
     try:
         geo_url = "https://geocoding-api.open-meteo.com/v1/search"
