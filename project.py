@@ -6,7 +6,7 @@ def get_weather(city):
     try:
         geo_url = "https://geocoding-api.open-meteo.com/v1/search"
         geo_params = {
-            "name": city,
+            "name": city + ", India",
             "count": 1,
             "language": "en",
             "format": "json",
