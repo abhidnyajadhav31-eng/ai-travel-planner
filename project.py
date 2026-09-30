@@ -14,6 +14,7 @@ def get_weather(city):
 
         geo_response = requests.get(geo_url, params=geo_params, timeout=10)
         geo_data = geo_response.json()
+        print("GEO DATA:", geo_data)
 
         if "results" not in geo_data or not geo_data["results"]:
             return "🌤️ Weather information not available"
@@ -86,8 +87,9 @@ def get_forecast(city):
             "name": city,
             "count": 1,
             "language": "en",
-            "format": "json"
-        }
+            "format": "json",
+            "countryCode": "IN"
+}
 
         geo_response = requests.get(geo_url, params=geo_params)
         geo_data = geo_response.json()
