@@ -9,7 +9,8 @@ def get_weather(city):
             "name": city,
             "count": 1,
             "language": "en",
-            "format": "json"
+            "format": "json",
+            "countryCode": "IN"
         }
 
         geo_response = requests.get(geo_url, params=geo_params, timeout=10)
